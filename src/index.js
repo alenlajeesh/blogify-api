@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Blogify API listening on http://localhost:${PORT}`);
+  console.log(`Server Started At Port : ${PORT} Link: http://localhost:${PORT}`);
 });
 
 // Graceful shutdown
