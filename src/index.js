@@ -34,7 +34,7 @@ function shutdown(signal) {
       console.error('Error closing server:', err);
       process.exit(1);
     }
-    console.log('Server closed.');
+    console.log('Server closed. BROOO');
     process.exit(0);
   });
 }
