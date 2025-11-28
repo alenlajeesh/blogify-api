@@ -1,10 +1,9 @@
 const express = require("express");
+const { getAllPosts } = require("../controllers/posts.controller");
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.send("Fetching all blog posts from the modular router!");
-});
+router.get("/", getAllPosts);
 
 module.exports = router;
 
