@@ -1,6 +1,6 @@
 const Post = require("../models/post.model.js")
 const ApiError=require("../utils/ApiError.js");
-exports.getAllPosts = async(req, res) => {
+exports.getAllPosts = async(req, res,next) => {
 	try{
 		const posts = await Post.find();
 		res.json({
@@ -8,12 +8,7 @@ exports.getAllPosts = async(req, res) => {
 			posts
 		});
 	}catch(err){
-		throw new ApiError(
-			500,
-			"Failed to retrive All Post",
-			true,
-			err.stack
-		)
+		next(err);
 	}
 };
  
@@ -21,22 +16,20 @@ exports.getPostById = async (req, res) => {
   try {
     const postId = req.params.postId;
 	const post = await Post.findById(postId); 
+	if(!post){
+		return next(new ApiError(404,"Post not found or invalid post Id"))
+	}
     res.json(post);
 
   } catch (error) {
-		throw new ApiError(
-			500,
-			"Failed to retrive All Post",
-			true,
-			err.stack
-		)
+		next(err);
 	}
 };
 exports.createPost=async(req,res)=>{
 	try{
 		const {title,content} =req.body;
 		if(!content || !title){
-			return res.status(204).send("No content");
+			return next(new ApiError(204,"No Content"));
 		}
 		const post = new Post({title,content});
 		await post.save()
@@ -46,12 +39,7 @@ exports.createPost=async(req,res)=>{
 		})
 
 	}catch(err){
-		throw new ApiError(
-			500,
-			"Failed to create Post",
-			true,
-			err.stack
-		);
+		next(err);
 	}
 }
 
