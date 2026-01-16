@@ -3,10 +3,13 @@ const { getAllPosts, getPostById,createPost } = require("../controllers/posts.co
 
 const router = express.Router();
 
-router.post("/",createPost)
-router.get("/", getAllPosts);
-router.get("/:postId", getPostById);
+const authMiddleware = require("../middlewares/authmiddleware.js");
+
+router.post("/", authMiddleware, createPost); 
+router.get("/", getAllPosts);                 
+router.get("/:postId", getPostById);         
+
 
 module.exports = router;
-;
+
 
