@@ -1,28 +1,43 @@
-const jwt =require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User.js");
+const ApiError = require("../utils/ApiError.js");
 
-const authMiddleware = async (req,res,next)=>{
+const authMiddleware = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-	const authHeader =req.headers.authorization;
+    if (!authHeader) {
+      return next(new ApiError(401, "No token provided"));
+    }
 
-	if(!authHeader){
-		return res.status(401).json({error:"No tokenn provided"});
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return next(new ApiError(401, "Invalid token format"));
+    }
 
-	}
-	const token =authHeader.split(" ")[1];
+    // Verify JWT
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return next(new ApiError(401, "Your token has expired. Please log in again."));
+      }
+      return next(new ApiError(401, "Invalid token. Please log in again."));
+    }
 
-	if(!token){
-		return res.status(401).json({error:"Invalid token format"});
-	}
+    // Optional: fetch user from DB to attach full object
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next(new ApiError(401, "User no longer exists"));
+    }
 
-	try{
-		const decoded =jwt.verify(token,process.env.JWT_SECRET);
+    req.user = currentUser; // attach full user object
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
-		req.user=decoded;
-		next();
-	}catch(err){
-		return res.status(401).json({error:"Invalid or expired token"})
-	}
-
-}
-module.exports= authMiddleware;
+module.exports = authMiddleware;
 
